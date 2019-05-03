@@ -2,6 +2,13 @@
   "name": "aeroedge",
   "version": "1.0.0",
   "description": "",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DVitaliy/aeroedge"
+  },
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
@@ -15,6 +22,7 @@
   },
   "devDependencies": {},
   "scripts": {
+    "prestart": "[ -d ./node_modules ] || npm i",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
