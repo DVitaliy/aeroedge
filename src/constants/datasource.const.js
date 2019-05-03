@@ -2,6 +2,7 @@ const DATASOURCE = {
   "5M": {
     displayName: "5M model",
     displayIcon: "filter_5",
+    defaultRoute: "/listing",
     roleList: ["ADMIN", "5M", "5MMASTER"],
   },
   logi: {

@@ -1,10 +1,10 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { SideBar } from './';
-import { authAction } from '../actions';
+import React from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import { SideBar } from "./";
+import { authAction } from "../actions";
 
-import payloadData from '../5m-import.json';
+import payloadData from "../5m-import.json";
 
 const popOver = {
   ref: null,
@@ -14,14 +14,14 @@ const popOver = {
   },
   show: function(el) {
     const rect = el.getBoundingClientRect();
-    this.ref.style.display = 'block';
+    this.ref.style.display = "block";
     this.ref.style.transform = `translate(${rect.left}px, ${rect.top +
       rect.height}px)`;
-    const label = this.ref.getElementsByClassName('filter-label');
+    const label = this.ref.getElementsByClassName("filter-label");
     if (label.length) label[0].innerText = el.textContent;
   },
   hide: function() {
-    this.ref.style.display = 'none';
+    this.ref.style.display = "none";
   },
 };
 
@@ -42,7 +42,7 @@ const PopOver = ({ setRef, popOverClickCancel, popOverClickSearch }) => (
       </button>
       <button
         className="waves-effect waves-teal btn grey lighten-5 grey-text"
-        style={{ marginLeft: '10px' }}
+        style={{ marginLeft: "10px" }}
         onClick={popOverClickCancel}
       >
         Cancel
@@ -51,7 +51,7 @@ const PopOver = ({ setRef, popOverClickCancel, popOverClickSearch }) => (
   </div>
 );
 const EmptyData = () => (
-  <h5 className="center grey-text" style={{ padding: '20px' }}>
+  <h5 className="center grey-text" style={{ padding: "20px" }}>
     No Data
   </h5>
 );
@@ -115,7 +115,7 @@ const TableBody = ({ data, click }) => (
 
 class ListingPage extends React.Component {
   constructor(props) {
-    console.log('ListingPage constructor', props);
+    console.log("ListingPage constructor", props);
     super(props);
     this.state = {
       data: null,
@@ -132,53 +132,53 @@ class ListingPage extends React.Component {
   }
 
   componentDidMount() {
-    console.log('ListingPage componentDidMount');
+    console.log("ListingPage componentDidMount");
     this.getData();
     this.popOverInstance = popOver.init(this.popOverRef);
   }
   componentDidUpdate(prevProps) {
-    console.log('ListingPage componentDidUpdate');
+    console.log("ListingPage componentDidUpdate");
     if (prevProps.location.search !== this.props.location.search)
-      console.log('UPPP');
+      console.log("UPPP");
   }
   componentWillUnmount() {
-    console.log('ListingPage componentWillUnmount');
+    console.log("ListingPage componentWillUnmount");
     this.popOverInstance.hide();
     this.popOverInstance = null;
   }
 
   handleItemClick(item) {
     this.props.history.push(
-      `/${this.props.match.params[0]}/detail/${item['Serial No']}`
+      `/${this.props.match.params[0]}/detail/${item["Serial No"]}`
     );
   }
   handleHeadOver(el) {
-    console.log('Over', el.target, this.popOverInstance);
+    console.log("Over", el.target, this.popOverInstance);
 
     this.popOverInstance.show(el.target);
   }
   handleHeadClick(evt) {
     evt.preventDefault();
     [...evt.target.parentNode.children].map(
-      el => evt.target !== el && el.classList.remove('sorted')
+      el => evt.target !== el && el.classList.remove("sorted")
     );
-    if (evt.target.classList.contains('sorted')) {
-      evt.target.classList.toggle('sorted-desc');
+    if (evt.target.classList.contains("sorted")) {
+      evt.target.classList.toggle("sorted-desc");
     }
-    evt.target.classList.add('sorted');
+    evt.target.classList.add("sorted");
 
     this.props.history.push({
       pathname: this.props.location.pathname,
       search: `sort[${
-        evt.target.classList.contains('sorted-desc') ? 'desc' : ''
+        evt.target.classList.contains("sorted-desc") ? "desc" : ""
       }]=${window
         .encodeURIComponent(evt.target.textContent)
-        .replace(/%20/g, '+')}`,
+        .replace(/%20/g, "+")}`,
     });
   }
   popOverClickSearch(evt) {
     evt.preventDefault();
-    window.M.toast({ html: 'Not implemented!' });
+    window.M.toast({ html: "Not implemented!" });
   }
   popOverClickCancel() {
     setTimeout(() => {
