@@ -1,0 +1,274 @@
+html,
+body {
+  font-family: "Roboto", "Helvetica", sans-serif;
+  background-color: whitesmoke;
+  overflow-y: scroll;
+}
+/**
+  Fixed blink effect on DashBoard
+*/
+body::-webkit-scrollbar {
+  width: 0.3rem;
+  height: 0;
+}
+body::-webkit-scrollbar-thumb {
+  transition: all 0.3s ease;
+  border-color: transparent;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 40;
+}
+/**
+https://materializecss.com/sidenav.html
+*/
+#root {
+  padding-left: 300px;
+}
+.navbar-fixed nav {
+  margin-left: -300px;
+  padding-left: 300px;
+}
+@media only screen and (max-width: 992px) {
+  #root {
+    padding-left: 0;
+  }
+  .navbar-fixed nav {
+    margin-left: 0;
+    padding-left: 0;
+  }
+}
+nav {
+  margin-bottom: 20px;
+}
+nav .input-field > label {
+  -webkit-transform: translateY(0px);
+  transform: translateY(0px);
+}
+nav .input-field > .material-icons {
+  top: 0px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+}
+nav .input-field input[type="text"]:valid {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+button {
+  font-family: "Roboto", "Helvetica", sans-serif;
+}
+fieldset {
+  border: none;
+  padding: 0;
+}
+.datepicker-day-button {
+  color: rgba(0, 0, 0, 0.9);
+}
+.center-block {
+  float: none !important;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.listing-form-nav-wrapped li {
+  width: 100% !important;
+  padding: 0 10px;
+}
+.listing-form-bar-wrapped {
+  padding: 0;
+}
+.listing-table {
+  overflow: auto;
+}
+.listing-table table {
+  font-size: 12px;
+}
+.listing-table td,
+.listing-table th {
+  cursor: default;
+}
+.listing-table th {
+  padding-left: 15px;
+  position: relative;
+}
+.listing-table th:before {
+  padding: 0;
+  text-align: center;
+  content: "￪";
+  display: block;
+  font-size: 18px;
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  /* background: red; */
+  left: 0;
+  line-height: 10px;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+.listing-table th.sorted:before,
+.listing-table th:hover:before {
+  opacity: 1;
+}
+.listing-table th.sorted-desc:before {
+  transform: rotate(180deg);
+}
+
+/* thead.highlight > tr > th {
+  -webkit-transition: background-color 0.25s ease;
+  transition: background-color 0.25s ease;
+} */
+thead.highlight > tr > th:hover {
+  background-color: rgba(242, 242, 242, 0.5);
+}
+
+thead th:not(.sorted) {
+  color: rgba(0, 0, 0, 0.6);
+}
+.popover {
+  position: absolute;
+  display: none;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 20em;
+  padding: 1em;
+  border: 1px solid #dadada;
+  background: #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.4s ease;
+}
+
+.popover:before,
+.popover:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #dadada;
+  background: #fff;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.popover:before {
+  z-index: -1;
+}
+
+.popover.arrow-top:before,
+.popover.arrow-top:after {
+  bottom: 100%;
+  left: 20px;
+  margin-bottom: -7px;
+  border-bottom: 0;
+  border-right: 0;
+}
+
+.popover.arrow-bottom:before,
+.popover.arrow-bottom:after {
+  top: 100%;
+  left: 20px;
+  margin-top: -7px;
+  border-top: 0;
+  border-left: 0;
+}
+
+.popover.arrow-right:before,
+.popover.arrow-right:after {
+  top: 20px;
+  left: 100%;
+  margin-left: -7px;
+  border-bottom: 0;
+  border-left: 0;
+}
+
+.popover.arrow-left:before,
+.popover.arrow-left:after {
+  top: 20px;
+  left: 0;
+  margin-left: -9px;
+  border-top: 0;
+  border-right: 0;
+}
+
+.svg-wrapper {
+  /* padding: 0;
+  background: #fff;
+  background-image: linear-gradient(#eee 1px, transparent 2px),
+    linear-gradient(to right, #eee 1px, transparent 2px);
+  background-size: 1em 1em; */
+}
+
+svg.dashboard-monitor.column {
+  border: 1px solid #e4e4e4;
+  border-radius: 7px;
+}
+svg.dashboard-monitor {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  animation: scale 0.6s;
+}
+@keyframes scale {
+  from {
+    transform: scale(0.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+svg.dashboard-monitor .hover-effect {
+  transition: stroke-width ease 450ms;
+}
+svg.dashboard-monitor g:hover .hover-effect {
+  stroke-width: 1.5;
+}
+
+/**
+  Widget's Animation (Dosnt work iOS)
+*/
+/*
+svg.dashboard-monitor text.value {
+  text-shadow: 1px 1px 0 #fff;
+}
+svg.dashboard-monitor text.value {
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  -webkit-animation: scale1 1s;
+  animation: scale1 1s;
+}
+
+@-webkit-keyframes scale1 {
+  from {
+    -webkit-transform: scale(3.5);
+  }
+  to {
+    -webkit-transform: scale(1);
+  }
+}
+@keyframes scale1 {
+  from {
+    -webkit-transform: scale(3.5);
+    transform: scale(3.5);
+  }
+  to {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}
+
+svg.dashboard-monitor text.total {
+  transform-origin: 50% 50%;
+  animation: opacity 1s;
+}
+
+ @keyframes opacity {
+  from {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+} */
