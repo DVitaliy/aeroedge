@@ -42,7 +42,7 @@ class SideNav extends React.Component {
                 <img
                   alt=""
                   width="140%"
-                  src={process.env.PUBLIC_URL + "/logo.jpg"}
+                  src={(process.env.PUBLIC_URL || "") + "/logo.jpg"}
                 />
               </div>
               <img
@@ -102,6 +102,6 @@ class SideNav extends React.Component {
   }
 }
 SideNav.propTypes = {
-  datasource: PropTypes.object.isRequired
+  datasource: PropTypes.object.isRequired,
 };
 export default withRouter(connect()(SideNav));

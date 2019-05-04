@@ -1,10 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import queryString from "query-string";
 import { SideBar } from "./";
-import { authAction } from "../actions";
-
-import payloadData from "../5m-import.json";
+import { dsAction } from "../actions";
 
 const popOver = {
   ref: null,
@@ -94,7 +93,7 @@ const TableHead = ({ data, over, click }) => (
   <thead className="highlight">
     <tr>
       {Object.keys(data).map((key, i) => (
-        <th key={i} onClick={click} onMouseOver={over}>
+        <th key={i} onClick={click} onMouseOver={over} data-index={key}>
           {key}
         </th>
       ))}
@@ -139,7 +138,7 @@ class ListingPage extends React.Component {
   componentDidUpdate(prevProps) {
     console.log("ListingPage componentDidUpdate");
     if (prevProps.location.search !== this.props.location.search)
-      console.log("UPPP");
+      this.getData();
   }
   componentWillUnmount() {
     console.log("ListingPage componentWillUnmount");
@@ -167,14 +166,18 @@ class ListingPage extends React.Component {
     }
     evt.target.classList.add("sorted");
 
-    this.props.history.push({
+    this.setQuery(
+      "sort." + evt.target.getAttribute("data-index"),
+      evt.target.classList.contains("sorted-desc") ? 1 : -1
+    );
+    /*this.props.history.push({
       pathname: this.props.location.pathname,
       search: `sort[${
         evt.target.classList.contains("sorted-desc") ? "desc" : ""
       }]=${window
         .encodeURIComponent(evt.target.textContent)
         .replace(/%20/g, "+")}`,
-    });
+      });*/
   }
   popOverClickSearch(evt) {
     evt.preventDefault();
@@ -187,8 +190,29 @@ class ListingPage extends React.Component {
   }
 
   getData() {
-    this.setState({
-      data: payloadData,
+    this.props
+      .dispatch(
+        dsAction.listing({
+          datasource: this.props.match.params[0],
+          parameters: this.props.location.search,
+        })
+      )
+      .then(data => {
+        console.log(data);
+        this.setState({
+          data: data.list,
+        });
+      })
+      .catch(error => console.log(error));
+  }
+
+  setQuery(key, value) {
+    const parsed = queryString.parse(this.props.location.search);
+    parsed[key] = value;
+    //console.dir(parsed);
+    this.props.history.push({
+      pathname: this.props.location.pathname,
+      search: queryString.stringify(parsed),
     });
   }
 

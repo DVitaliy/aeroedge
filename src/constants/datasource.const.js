@@ -1,5 +1,5 @@
 const DATASOURCE = {
-  "5M": {
+  "5m": {
     displayName: "5M model",
     displayIcon: "filter_5",
     defaultRoute: "/listing",

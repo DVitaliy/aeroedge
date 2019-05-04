@@ -32,6 +32,10 @@ class API {
     return this.fetch(AUTH_URLS.USERS_AUTHENTICATE, DATA);
   }
 
+  getListing(url) {
+    return this.fetch(url);
+  }
+
   fetch(url = "", { method = "get", body = null } = {}) {
     const requestData = {
       method,
