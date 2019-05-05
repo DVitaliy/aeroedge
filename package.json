@@ -12,7 +12,6 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "query-string": "6.5.0",
     "react": "16.8.4",
     "react-dom": "16.8.4",
     "react-redux": "6.0.1",

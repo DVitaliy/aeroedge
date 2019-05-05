@@ -2,8 +2,20 @@ const DATASOURCE = {
   "5m": {
     displayName: "5M model",
     displayIcon: "filter_5",
-    defaultRoute: "/listing",
-    roleList: ["ADMIN", "5M", "5MMASTER"],
+    defaultRoute: "/listing?filter.revisionCode=E4&sort.serialNo=-1",
+    listingTableHead: {
+      arrivalDate: { displayName: "Arrival date" },
+      measurementResult: { displayName: "Measurement result" },
+      methodCode: { displayName: "Method code" },
+      //partStatus: { displayName: ""},
+      productCode: { displayName: "Product code" },
+      revisionCode: { displayName: "Revision code" },
+      serialNo: { displayName: "Serial No" },
+      shipDate: { displayName: "Ship date" },
+      //status: { displayName: "" },
+      workedDate: { displayName: "Worked date" },
+    },
+    roleList: ["5M", "5MMASTER"],
   },
   logi: {
     displayName: "Logistics",
@@ -24,7 +36,7 @@ const DATASOURCE = {
   },
 };
 
-export const getDataSource = (access = []) =>
+export const getListDataSourceByRole = (access = []) =>
   Object.assign(
     ...Object.keys(DATASOURCE)
       .filter(key =>
@@ -37,3 +49,5 @@ export const getDataSource = (access = []) =>
         },
       }))
   );
+
+export const getDataSourceByKey = key => DATASOURCE[key] || null;

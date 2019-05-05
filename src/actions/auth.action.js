@@ -1,11 +1,11 @@
-import { AUTH_ACTION } from "../constants";
+import { AUTH_ACTION, AUTH_URLS } from "../constants";
 
 const login = ({ username, password }) => (dispatch, getState, api) => {
   dispatch({ type: AUTH_ACTION.LOGIN_REQUEST });
 
   return api
     .setToken()
-    .login({ username, password })
+    .login({ url: AUTH_URLS.USERS_AUTHENTICATE, username, password })
     .then(json => {
       const payload = JSON.parse(
         decodeURIComponent(escape(window.atob(json.token.split(".")[1])))

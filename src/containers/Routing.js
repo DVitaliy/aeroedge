@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-import { getDataSource } from "../constants";
+import { getListDataSourceByRole } from "../constants";
 import {
   LoginPage,
   RemembPage,
@@ -42,7 +42,7 @@ class Routing extends React.Component {
     }
 
     //DATASOURCE @obj
-    const DATASOURCE = getDataSource(this.props.roleList);
+    const DATASOURCE = getListDataSourceByRole(this.props.roleList);
     const ROOT_PATH = `/(${Object.keys(DATASOURCE).join("|")})`;
     const DEFAULT_DATASOURCE = Object.keys(DATASOURCE)[0];
     const DEFAULT_PATH = `/${DATASOURCE[DEFAULT_DATASOURCE].defaultRoute}`;

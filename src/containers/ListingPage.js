@@ -1,26 +1,52 @@
+/**
+  TODO: 
+  - loading (skip getData if true, animation show)
+  - SideBar (filter)
+  - pagination (next, prev)
+  - hide same rows (after getData run method filter for hide row ex. `status`) add method to datasource.const
+  - remove console.log
+  - show error toast bad connect or fail getData
+  - corrected position popOver at small size view (when listing table transformed)
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import queryString from "query-string";
 import { SideBar } from "./";
 import { dsAction } from "../actions";
+import { getDataSourceByKey } from "../constants";
 
 const popOver = {
   ref: null,
+  thead: null,
   init: function(ref) {
     this.ref = ref.current;
     return this;
   },
   show: function(el) {
+    this.thead = el.dataset.index;
     const rect = el.getBoundingClientRect();
     this.ref.style.display = "block";
     this.ref.style.transform = `translate(${rect.left}px, ${rect.top +
       rect.height}px)`;
-    const label = this.ref.getElementsByClassName("filter-label");
-    if (label.length) label[0].innerText = el.textContent;
+    this.label(el.textContent);
+    this.input(el.dataset.filter).name = this.thead;
+    if (el.dataset.filter.length)
+      this.label(el.textContent).classList.add("active");
+    else this.label(el.textContent).classList.remove("active");
   },
   hide: function() {
     this.ref.style.display = "none";
+  },
+  label: function(text) {
+    const label = this.ref.querySelector(".filter-label");
+    if (text) label.innerText = text;
+    return label;
+  },
+  input: function(text) {
+    const input = this.ref.querySelector("input");
+    if (typeof text !== "undefined") input.value = text;
+    return input;
   },
 };
 
@@ -89,12 +115,23 @@ const Pagination = () => (
   </ul>
 );
 
-const TableHead = ({ data, over, click }) => (
+const TableHead = ({ data, over, click, sort, filter }) => (
   <thead className="highlight">
     <tr>
-      {Object.keys(data).map((key, i) => (
-        <th key={i} onClick={click} onMouseOver={over} data-index={key}>
-          {key}
+      {data.map((obj, i) => (
+        <th
+          key={i}
+          onClick={click}
+          onMouseOver={over}
+          data-index={obj.key}
+          data-filter={filter.field === obj.key ? filter.value : ""}
+          className={
+            sort.field === obj.key
+              ? "sorted" + (sort.desc ? " sorted-desc" : "")
+              : ""
+          }
+        >
+          {obj.value || obj.key}
         </th>
       ))}
     </tr>
@@ -117,10 +154,14 @@ class ListingPage extends React.Component {
     console.log("ListingPage constructor", props);
     super(props);
     this.state = {
-      data: null,
+      data: [],
+
       page: null,
       loading: true,
     };
+
+    this.DATASOURCE_KEY = this.props.match.params[0];
+    this.DATASOURCE_OBJ = getDataSourceByKey(this.DATASOURCE_KEY);
     this.popOverInstance = null;
     this.popOverRef = React.createRef();
     this.handleItemClick = this.handleItemClick.bind(this);
@@ -152,48 +193,67 @@ class ListingPage extends React.Component {
     );
   }
   handleHeadOver(el) {
-    console.log("Over", el.target, this.popOverInstance);
-
     this.popOverInstance.show(el.target);
   }
   handleHeadClick(evt) {
     evt.preventDefault();
-    [...evt.target.parentNode.children].map(
-      el => evt.target !== el && el.classList.remove("sorted")
-    );
-    if (evt.target.classList.contains("sorted")) {
-      evt.target.classList.toggle("sorted-desc");
+    const target = evt.target;
+    /*[...target.parentNode.children].map(
+      el => target !== el && el.classList.remove("sorted")
+    );*/
+    if (target.classList.contains("sorted")) {
+      target.classList.toggle("sorted-desc");
     }
-    evt.target.classList.add("sorted");
 
-    this.setQuery(
-      "sort." + evt.target.getAttribute("data-index"),
-      evt.target.classList.contains("sorted-desc") ? 1 : -1
-    );
-    /*this.props.history.push({
+    // update|add sort query params
+    const index = target.dataset.index;
+    const value = target.classList.contains("sorted-desc") ? -1 : 1;
+    const param = `sort.${index}=${value}`;
+    let search = this.props.location.search;
+
+    if (~search.indexOf("sort."))
+      search = search.replace(/sort\.[^=]+=[^&]+/, param);
+    else search += (search.length ? "&" : "") + param;
+
+    this.props.history.push({
       pathname: this.props.location.pathname,
-      search: `sort[${
-        evt.target.classList.contains("sorted-desc") ? "desc" : ""
-      }]=${window
-        .encodeURIComponent(evt.target.textContent)
-        .replace(/%20/g, "+")}`,
-      });*/
+      search,
+    });
   }
   popOverClickSearch(evt) {
     evt.preventDefault();
-    window.M.toast({ html: "Not implemented!" });
+    const index = this.popOverInstance.thead;
+    const value = this.popOverInstance.input().value;
+    const param = `filter.${index}=${value}`;
+    let search = this.props.location.search;
+
+    // Update/remove filter query params
+    if (~search.indexOf("filter."))
+      search = search.replace(
+        /(&?)filter\.[^=]+=[^&]+/,
+        value.length ? `$1${param}` : ""
+      );
+    // Add
+    else if (value.length) search += (search.length ? "&" : "") + param;
+    else window.M.toast({ html: "Set the filter" });
+
+    if (search !== this.props.location.search) this.popOverClickCancel();
+    this.props.history.push({
+      pathname: this.props.location.pathname,
+      search,
+    });
   }
   popOverClickCancel() {
     setTimeout(() => {
       this.popOverInstance.hide();
-    }, 300);
+    }, 200);
   }
 
   getData() {
     this.props
       .dispatch(
         dsAction.listing({
-          datasource: this.props.match.params[0],
+          datasource: this.DATASOURCE_KEY,
           parameters: this.props.location.search,
         })
       )
@@ -206,18 +266,34 @@ class ListingPage extends React.Component {
       .catch(error => console.log(error));
   }
 
-  setQuery(key, value) {
-    const parsed = queryString.parse(this.props.location.search);
-    parsed[key] = value;
-    //console.dir(parsed);
-    this.props.history.push({
-      pathname: this.props.location.pathname,
-      search: queryString.stringify(parsed),
-    });
-  }
-
   render() {
     const { data, loading, page } = this.state;
+    const { search } = this.props.location;
+    const { listingTableHead } = this.DATASOURCE_OBJ;
+
+    const sort = {
+      field: null,
+      desc: false,
+    };
+    {
+      const match = search.match(/sort\.([^=]+)=(-?\d)/);
+      if (match !== null) {
+        sort.field = match[1];
+        sort.desc = !~match[2] | 0;
+      }
+    }
+    const filter = {
+      field: null,
+      value: "",
+    };
+    {
+      const match = search.match(/filter\.([^=]+)=([^&]+)/);
+      if (match !== null) {
+        filter.field = match[1];
+        filter.value = match[2];
+      }
+    }
+
     return (
       <React.Fragment>
         <SideBar />
@@ -225,12 +301,19 @@ class ListingPage extends React.Component {
           <div className="col s12">
             <div className="card">
               {loading && <Loading />}
-              {data ? (
+              {data.length ? (
                 <React.Fragment>
                   <div className="listing-table">
                     <table className="responsive-table striped">
                       <TableHead
-                        data={data[0]}
+                        data={Object.keys(data[0]).map(key => ({
+                          key,
+                          value: listingTableHead[key]
+                            ? listingTableHead[key].displayName
+                            : "",
+                        }))}
+                        sort={sort}
+                        filter={filter}
                         over={this.handleHeadOver}
                         click={this.handleHeadClick}
                       />

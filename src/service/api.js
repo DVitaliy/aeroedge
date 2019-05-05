@@ -1,5 +1,3 @@
-import { AUTH_URLS } from "../constants";
-
 class API {
   constructor({ host = "" }) {
     this.baseUrl = host;
@@ -9,7 +7,6 @@ class API {
   }
   setHeader(name, value) {
     if (!value) return this.headers.delete(name);
-
     if (!this.headers.has(name)) return this.headers.append(name, value);
 
     return this.headers.set(name, value);
@@ -21,7 +18,7 @@ class API {
     return this;
   }
 
-  login({ username, password }) {
+  login({ url, username, password }) {
     const DATA = {
       method: "POST",
       body: JSON.stringify({
@@ -29,7 +26,7 @@ class API {
         secret: password,
       }),
     };
-    return this.fetch(AUTH_URLS.USERS_AUTHENTICATE, DATA);
+    return this.fetch(url, DATA);
   }
 
   getListing(url) {

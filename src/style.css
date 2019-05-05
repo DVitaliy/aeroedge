@@ -90,20 +90,36 @@ fieldset {
   padding-left: 15px;
   position: relative;
 }
+
+.listing-table th:after,
 .listing-table th:before {
-  padding: 0;
-  text-align: center;
-  content: "￪";
+  content: "";
   display: block;
-  font-size: 18px;
   position: absolute;
-  width: 15px;
-  height: 15px;
-  /* background: red; */
-  left: 0;
-  line-height: 10px;
+}
+
+.listing-table th:after {
+  width: 6px;
+  height: 6px;
+  background-color: rgba(38, 166, 154, 0.4);
+  right: 6px;
+  top: 6px;
+  border-radius: 50%;
+}
+.listing-table th[data-filter=""]:after {
+  display: none;
+}
+
+.listing-table th:before {
+  left: 3px;
+  top: calc(50% - 2px);
   opacity: 0;
   transition: all 0.5s ease;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 4px 8px 4px;
+  border-color: transparent transparent #26a69a transparent;
 }
 
 .listing-table th.sorted:before,
