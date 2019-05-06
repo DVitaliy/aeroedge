@@ -1,12 +1,14 @@
 /**
   TODO: 
-  - loading (skip getData if true, animation show)
+  - button which remove all filter - done
+  - change inside params (status 1 - Completed) enumValues datasource.const
+  - loading (skip getData if true, animation show) - done
   - SideBar (filter)
   - pagination (next, prev)
-  - hide same rows (after getData run method filter for hide row ex. `status`) add method to datasource.const
   - remove console.log
   - show error toast bad connect or fail getData
   - corrected position popOver at small size view (when listing table transformed)
+  - in popover make userfull input -> for ProductId, RevicionCode.. - use select
 */
 
 import React from "react";
@@ -80,11 +82,11 @@ const EmptyData = () => (
     No Data
   </h5>
 );
-const Loading = () => (
+/*const Loading = () => (
   <div className="progress">
     <div className="indeterminate" />
   </div>
-);
+);*/
 const Pagination = () => (
   <ul className="pagination right">
     <li className="disabled">
@@ -114,8 +116,19 @@ const Pagination = () => (
     </li>
   </ul>
 );
-
-const TableHead = ({ data, over, click, sort, filter }) => (
+const FilterChip = ({ data }) => (
+  <div style={{ padding: "10px" }}>
+    {data.map((obj, i) => (
+      <div className="chip" data-index={obj.key} key={i}>
+        {obj.value}
+        <i className="remove material-icons" onClick={() => obj.click(obj.key)}>
+          close
+        </i>
+      </div>
+    ))}
+  </div>
+);
+const TableHead = ({ data, over, click, filter }) => (
   <thead className="highlight">
     <tr>
       {data.map((obj, i) => (
@@ -124,26 +137,32 @@ const TableHead = ({ data, over, click, sort, filter }) => (
           onClick={click}
           onMouseOver={over}
           data-index={obj.key}
-          data-filter={filter.field === obj.key ? filter.value : ""}
-          className={
-            sort.field === obj.key
-              ? "sorted" + (sort.desc ? " sorted-desc" : "")
-              : ""
-          }
+          data-filter={obj.filter}
+          className={obj.sort}
         >
-          {obj.value || obj.key}
+          {obj.value}
         </th>
       ))}
     </tr>
   </thead>
 );
-const TableBody = ({ data, click }) => (
+const TableBody = ({ data, click, pattern }) => (
   <tbody>
     {data.map((item, i) => (
       <tr key={i} onClick={click.bind(null, item)}>
-        {Object.keys(item).map((key, i) => (
-          <td key={i}>{item[key]}</td>
-        ))}
+        {Object.keys(item).map((key, i) => {
+          const name =
+            key in pattern
+              ? "enumValues" in pattern[key]
+                ? item[key] in pattern[key].enumValues
+                  ? pattern[key].enumValues[item[key]]
+                    ? pattern[key].enumValues[item[key]].displayName
+                    : null
+                  : null
+                : null
+              : null;
+          return <td key={i}>{name || item[key]}</td>;
+        })}
       </tr>
     ))}
   </tbody>
@@ -155,9 +174,9 @@ class ListingPage extends React.Component {
     super(props);
     this.state = {
       data: [],
+      loading: false,
 
       page: null,
-      loading: true,
     };
 
     this.DATASOURCE_KEY = this.props.match.params[0];
@@ -167,22 +186,20 @@ class ListingPage extends React.Component {
     this.handleItemClick = this.handleItemClick.bind(this);
     this.handleHeadOver = this.handleHeadOver.bind(this);
     this.handleHeadClick = this.handleHeadClick.bind(this);
+    this.handleChipClick = this.handleChipClick.bind(this);
     this.popOverClickCancel = this.popOverClickCancel.bind(this);
     this.popOverClickSearch = this.popOverClickSearch.bind(this);
   }
 
   componentDidMount() {
-    console.log("ListingPage componentDidMount");
     this.getData();
     this.popOverInstance = popOver.init(this.popOverRef);
   }
   componentDidUpdate(prevProps) {
-    console.log("ListingPage componentDidUpdate");
     if (prevProps.location.search !== this.props.location.search)
       this.getData();
   }
   componentWillUnmount() {
-    console.log("ListingPage componentWillUnmount");
     this.popOverInstance.hide();
     this.popOverInstance = null;
   }
@@ -194,6 +211,13 @@ class ListingPage extends React.Component {
   }
   handleHeadOver(el) {
     this.popOverInstance.show(el.target);
+  }
+  handleChipClick(key) {
+    const { pathname, search } = this.props.location;
+    this.props.history.push({
+      pathname,
+      search: search.replace(new RegExp("&?filter\\." + key + "=[^&]+"), ""),
+    });
   }
   handleHeadClick(evt) {
     evt.preventDefault();
@@ -224,52 +248,71 @@ class ListingPage extends React.Component {
     evt.preventDefault();
     const index = this.popOverInstance.thead;
     const value = this.popOverInstance.input().value;
+
+    if (!value.length) return window.M.toast({ html: "Set the filter" });
+
     const param = `filter.${index}=${value}`;
     let search = this.props.location.search;
 
-    // Update/remove filter query params
-    if (~search.indexOf("filter."))
+    // Update filter query params
+    if (~search.indexOf(`filter.${index}=`))
       search = search.replace(
-        /(&?)filter\.[^=]+=[^&]+/,
-        value.length ? `$1${param}` : ""
+        new RegExp("(&?)filter\\." + index + "=[^&]+"),
+        `$1${param}`
       );
     // Add
-    else if (value.length) search += (search.length ? "&" : "") + param;
-    else window.M.toast({ html: "Set the filter" });
+    else search += (search.length ? "&" : "") + param;
 
-    if (search !== this.props.location.search) this.popOverClickCancel();
     this.props.history.push({
       pathname: this.props.location.pathname,
       search,
     });
+    this.popOverClickCancel();
   }
   popOverClickCancel() {
     setTimeout(() => {
-      this.popOverInstance.hide();
+      if (this.popOverInstance) this.popOverInstance.hide();
     }, 200);
   }
-
   getData() {
+    if (this.state.loading) return;
+
+    this.setState({
+      loading: true,
+    });
+
+    const preprocessing =
+      "listingPreprocessGetData" in this.DATASOURCE_OBJ
+        ? this.DATASOURCE_OBJ.listingPreprocessGetData
+        : arg => arg;
+
     this.props
       .dispatch(
-        dsAction.listing({
-          datasource: this.DATASOURCE_KEY,
-          parameters: this.props.location.search,
-        })
+        dsAction.listing(
+          preprocessing({
+            datasource: this.DATASOURCE_KEY,
+            parameters: this.props.location.search,
+          })
+        )
       )
       .then(data => {
         console.log(data);
         this.setState({
           data: data.list,
+          loading: false,
         });
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        this.setState({
+          loading: false,
+        });
+        console.log(error);
+      });
   }
-
   render() {
-    const { data, loading, page } = this.state;
+    const { data, page } = this.state;
     const { search } = this.props.location;
-    const { listingTableHead } = this.DATASOURCE_OBJ;
+    const { listingDataPattern = {} } = this.DATASOURCE_OBJ;
 
     const sort = {
       field: null,
@@ -282,15 +325,16 @@ class ListingPage extends React.Component {
         sort.desc = !~match[2] | 0;
       }
     }
-    const filter = {
-      field: null,
-      value: "",
-    };
+    const filters = {};
     {
-      const match = search.match(/filter\.([^=]+)=([^&]+)/);
-      if (match !== null) {
-        filter.field = match[1];
-        filter.value = match[2];
+      const matchAll = search.match(/filter\.[^=]+=[^&]+/g);
+      if (matchAll !== null) {
+        matchAll.forEach(key => {
+          const match = key.match(/filter\.([^=]+)=([^&]+)/);
+          if (match !== null) {
+            filters[match[1]] = match[2];
+          }
+        });
       }
     }
 
@@ -300,7 +344,18 @@ class ListingPage extends React.Component {
         <div className="row">
           <div className="col s12">
             <div className="card">
-              {loading && <Loading />}
+              {/*loading && <Loading />*/}
+              {Object.keys(filters).length !== 0 && (
+                <FilterChip
+                  data={Object.keys(filters).map(key => ({
+                    key,
+                    value: listingDataPattern[key]
+                      ? listingDataPattern[key].displayName
+                      : key,
+                    click: this.handleChipClick,
+                  }))}
+                />
+              )}
               {data.length ? (
                 <React.Fragment>
                   <div className="listing-table">
@@ -308,19 +363,26 @@ class ListingPage extends React.Component {
                       <TableHead
                         data={Object.keys(data[0]).map(key => ({
                           key,
-                          value: listingTableHead[key]
-                            ? listingTableHead[key].displayName
-                            : "",
+                          value: listingDataPattern[key]
+                            ? listingDataPattern[key].displayName
+                            : key,
+                          sort:
+                            sort.field === key
+                              ? "sorted" + (sort.desc ? " sorted-desc" : "")
+                              : "",
+                          filter: key in filters ? filters[key] : "",
                         }))}
-                        sort={sort}
-                        filter={filter}
                         over={this.handleHeadOver}
                         click={this.handleHeadClick}
                       />
-                      <TableBody data={data} click={this.handleItemClick} />
+                      <TableBody
+                        data={data}
+                        click={this.handleItemClick}
+                        pattern={listingDataPattern}
+                      />
                     </table>
                   </div>
-                  {page && (
+                  {!page && (
                     <div className="row">
                       <div className="col s12">
                         <Pagination />

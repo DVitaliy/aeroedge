@@ -2,6 +2,7 @@
   TODO: process.env.NODE_ENV
   - include redux devtools only dev mode
   - subscribe to store only dev mode
+  - add caching for `get` request in API
 */
 
 import React from "react";
@@ -20,6 +21,7 @@ import "./style.css";
 
 const api = new API({
   host: process.env.REACT_APP_HOST_BACKEND,
+  //cach: true
 });
 
 const composeEnhancers =

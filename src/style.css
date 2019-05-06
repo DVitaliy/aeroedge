@@ -288,3 +288,11 @@ svg.dashboard-monitor text.total {
     transform: scale(0.1);
   }
 } */
+
+.chip .remove {
+  cursor: pointer;
+  float: right;
+  font-size: 16px;
+  line-height: 32px;
+  padding-left: 8px;
+}

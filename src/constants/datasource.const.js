@@ -2,18 +2,44 @@ const DATASOURCE = {
   "5m": {
     displayName: "5M model",
     displayIcon: "filter_5",
-    defaultRoute: "/listing?filter.revisionCode=E4&sort.serialNo=-1",
-    listingTableHead: {
+    defaultRoute:
+      "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
+    listingDataPattern: {
       arrivalDate: { displayName: "Arrival date" },
-      measurementResult: { displayName: "Measurement result" },
+      measurementResult: {
+        displayName: "Measurement result",
+        enumValues: {
+          "0": { displayName: "OK" },
+          "1": { displayName: "NG" },
+        },
+      },
       methodCode: { displayName: "Method code" },
-      //partStatus: { displayName: ""},
       productCode: { displayName: "Product code" },
       revisionCode: { displayName: "Revision code" },
       serialNo: { displayName: "Serial No" },
       shipDate: { displayName: "Ship date" },
-      //status: { displayName: "" },
+      status: {
+        displayName: "Status",
+        enumValues: {
+          "0": { displayName: "Work in progress" },
+          "1": { displayName: "Completed" },
+          "-1": { displayName: "Scraped" },
+        },
+      },
+      partStatus: {
+        displayName: "Part status",
+        enumValues: {
+          "0": { displayName: "Work in progress" },
+          "1": { displayName: "Completed" },
+          "-1": { displayName: "Scraped" },
+        },
+      },
       workedDate: { displayName: "Worked date" },
+    },
+    listingPreprocessGetData: ({ datasource, parameters }) => {
+      //if (!~parameters.indexOf(`filter.status=`))
+
+      return { datasource, parameters };
     },
     roleList: ["5M", "5MMASTER"],
   },

@@ -61,7 +61,7 @@ class SideBar extends React.Component {
   static defaultProps = {
     importEnable: true,
     addNewEnable: true,
-    listingFormEnable: true
+    listingFormEnable: true,
   };
   constructor(props) {
     console.log("SideBar constructor", props);
@@ -77,9 +77,9 @@ class SideBar extends React.Component {
   componentDidMount() {
     const elems = document.querySelectorAll(".datepicker");
     this.datepicker = window.M.Datepicker.init(elems, {
-      format: "yyyy/m/dd",
+      format: "yyyy/mm/dd",
       autoClose: true,
-      container: "body"
+      container: "body",
     });
     this.sideNavInstance = window.M.Sidenav.init(this.sideNav, {
       edge: "right",
@@ -97,7 +97,7 @@ class SideBar extends React.Component {
             this.listingForm.current
           );
         }
-      }
+      },
     });
     console.log("SideBar componentDidMount");
   }
@@ -114,7 +114,7 @@ class SideBar extends React.Component {
       history,
       importEnable,
       addNewEnable,
-      listingFormEnable
+      listingFormEnable,
     } = this.props;
     const dataSource = this.props.match.params[0];
     return (
@@ -196,6 +196,6 @@ class SideBar extends React.Component {
 SideBar.propTypes = {
   importEnable: PropTypes.bool,
   addNewEnable: PropTypes.bool,
-  listingFormEnable: PropTypes.bool
+  listingFormEnable: PropTypes.bool,
 };
 export default withRouter(SideBar);
