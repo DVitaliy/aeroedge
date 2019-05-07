@@ -13,7 +13,7 @@
 
 import React from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { SideBar } from "./";
 import { dsAction } from "../actions";
 import { getDataSourceByKey } from "../constants";
@@ -87,32 +87,17 @@ const EmptyData = () => (
     <div className="indeterminate" />
   </div>
 );*/
-const Pagination = () => (
+const Pagination = ({ prev, next }) => (
   <ul className="pagination right">
-    <li className="disabled">
-      <a href="#!">
+    <li className={prev ? "" : "disabled"}>
+      <Link to={prev} disabled={!prev}>
         <i className="material-icons">chevron_left</i>
-      </a>
+      </Link>
     </li>
-    <li className="active">
-      <a href="#!">1</a>
-    </li>
-    <li className="waves-effect">
-      <a href="#!">2</a>
-    </li>
-    <li className="waves-effect">
-      <a href="#!">3</a>
-    </li>
-    <li className="waves-effect">
-      <a href="#!">4</a>
-    </li>
-    <li className="waves-effect">
-      <a href="#!">5</a>
-    </li>
-    <li className="waves-effect">
-      <a href="#!">
+    <li className={next ? "" : "disabled"}>
+      <Link to={next} disabled={!next}>
         <i className="material-icons">chevron_right</i>
-      </a>
+      </Link>
     </li>
   </ul>
 );
@@ -176,7 +161,9 @@ class ListingPage extends React.Component {
       data: [],
       loading: false,
 
-      page: null,
+      nextPage: null,
+      prevPage: null,
+      allPages: {},
     };
 
     this.DATASOURCE_KEY = this.props.match.params[0];
@@ -274,12 +261,27 @@ class ListingPage extends React.Component {
       if (this.popOverInstance) this.popOverInstance.hide();
     }, 200);
   }
+  generatePaging() {
+    const { nextPage, prevPage } = this.state;
+    const { search, pathname } = this.props.location;
+    const prev =
+      prevPage !== null
+        ? pathname +
+          search.replace(/(&?)page=[^&]+/, prevPage ? `$1page=${prevPage}` : "")
+        : "";
+
+    const next = nextPage
+      ? ~search.indexOf("page=")
+        ? pathname + search.replace(/page=[^&]+/, `page=${nextPage}`)
+        : pathname + search + (search.length ? "&" : "") + "page=" + nextPage
+      : "";
+
+    return { prev, next };
+  }
   getData() {
     if (this.state.loading) return;
 
-    this.setState({
-      loading: true,
-    });
+    this.setState({ loading: true });
 
     const preprocessing =
       "listingPreprocessGetData" in this.DATASOURCE_OBJ
@@ -297,23 +299,44 @@ class ListingPage extends React.Component {
       )
       .then(data => {
         console.log(data);
-        this.setState({
-          data: data.list,
-          loading: false,
-        });
+        this.setState(
+          state => {
+            let result = {
+              data: data.list,
+              loading: false,
+              nextPage: data.nextPage || "",
+              prevPage:
+                state.nextPage &&
+                state.nextPage !== data.nextPage &&
+                state.nextPage in state.allPages
+                  ? state.allPages[state.nextPage]
+                  : state.nextPage === data.nextPage
+                  ? "123"
+                  : state.nextPage,
+              allPages: { ...state.allPages },
+            };
+            console.log(state);
+            if (data.nextPage && !(data.nextPage in state.allPages)) {
+              result.allPages[data.nextPage] = state.nextPage || "";
+            }
+            return result;
+          },
+          () => console.log(this.state)
+        );
       })
       .catch(error => {
         this.setState({
           loading: false,
         });
-        console.log(error);
+        window.M.toast({ html: error, classes: "warning" });
       });
   }
   render() {
-    const { data, page } = this.state;
+    const { data } = this.state;
     const { search } = this.props.location;
+    const { prev, next } = this.generatePaging();
+    console.log(this.generatePaging());
     const { listingDataPattern = {} } = this.DATASOURCE_OBJ;
-
     const sort = {
       field: null,
       desc: false,
@@ -382,13 +405,11 @@ class ListingPage extends React.Component {
                       />
                     </table>
                   </div>
-                  {!page && (
-                    <div className="row">
-                      <div className="col s12">
-                        <Pagination />
-                      </div>
+                  <div className="row">
+                    <div className="col s12">
+                      {<Pagination next={next} prev={prev} />}
                     </div>
-                  )}
+                  </div>
                 </React.Fragment>
               ) : (
                 <EmptyData />

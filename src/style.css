@@ -4,6 +4,9 @@ body {
   background-color: whitesmoke;
   overflow-y: scroll;
 }
+a[disabled] {
+  pointer-events: none;
+}
 /**
   Fixed blink effect on DashBoard
 */
@@ -295,4 +298,9 @@ svg.dashboard-monitor text.total {
   font-size: 16px;
   line-height: 32px;
   padding-left: 8px;
+}
+
+.toast.warning {
+  background-color: #ee6e73;
+  text-shadow: 1px 1px 2px #984447;
 }
