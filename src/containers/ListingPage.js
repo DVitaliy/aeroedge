@@ -203,8 +203,11 @@ class ListingPage extends React.Component {
     const { pathname, search } = this.props.location;
     this.props.history.push({
       pathname,
-      search: search.replace(new RegExp("&?filter\\." + key + "=[^&]+"), ""),
+      search: search
+        .replace(new RegExp("&?filter\\." + key + "=[^&]+"), "")
+        .replace(/(&?)page=[^&]+/, ""),
     });
+    this.setState({ nextPage: null, prevPage: null, allPages: {} });
   }
   handleHeadClick(evt) {
     evt.preventDefault();
@@ -225,6 +228,10 @@ class ListingPage extends React.Component {
     if (~search.indexOf("sort."))
       search = search.replace(/sort\.[^=]+=[^&]+/, param);
     else search += (search.length ? "&" : "") + param;
+
+    // Remove page params
+    search = search.replace(/(&?)page=[^&]+/, "");
+    this.setState({ nextPage: null, prevPage: null, allPages: {} });
 
     this.props.history.push({
       pathname: this.props.location.pathname,
@@ -249,6 +256,10 @@ class ListingPage extends React.Component {
       );
     // Add
     else search += (search.length ? "&" : "") + param;
+
+    // Remove page params
+    search = search.replace(/(&?)page=[^&]+/, "");
+    this.setState({ nextPage: null, prevPage: null, allPages: {} });
 
     this.props.history.push({
       pathname: this.props.location.pathname,
@@ -282,6 +293,7 @@ class ListingPage extends React.Component {
     if (this.state.loading) return;
 
     this.setState({ loading: true });
+    const { search } = this.props.location;
 
     const preprocessing =
       "listingPreprocessGetData" in this.DATASOURCE_OBJ
@@ -293,29 +305,33 @@ class ListingPage extends React.Component {
         dsAction.listing(
           preprocessing({
             datasource: this.DATASOURCE_KEY,
-            parameters: this.props.location.search,
+            parameters: search,
           })
         )
       )
       .then(data => {
-        console.log(data);
         this.setState(
           state => {
+            console.log(state, data);
             let result = {
               data: data.list,
               loading: false,
-              nextPage: data.nextPage || "",
+              nextPage: data.nextPage || null,
               prevPage:
-                state.nextPage &&
-                state.nextPage !== data.nextPage &&
-                state.nextPage in state.allPages
-                  ? state.allPages[state.nextPage]
-                  : state.nextPage === data.nextPage
-                  ? "123"
+                state.nextPage && state.nextPage in state.allPages
+                  ? state.allPages[state.nextPage] !== data.nextPage
+                    ? state.allPages[state.nextPage]
+                    : (() => {
+                        // prev click
+                        try {
+                          const match = search.match(/page=([^&]+)/);
+                          return match && state.allPages[match[1]];
+                        } catch (e) {}
+                        return "1112";
+                      })()
                   : state.nextPage,
               allPages: { ...state.allPages },
             };
-            console.log(state);
             if (data.nextPage && !(data.nextPage in state.allPages)) {
               result.allPages[data.nextPage] = state.nextPage || "";
             }

@@ -2,8 +2,9 @@ const DATASOURCE = {
   "5m": {
     displayName: "5M model",
     displayIcon: "filter_5",
-    defaultRoute: "/listing?sort.productCode=1",
-    //defaultRoute: "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
+    //defaultRoute: "/listing?sort.productCode=1",
+    defaultRoute:
+      "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
     listingDataPattern: {
       arrivalDate: { displayName: "Arrival date" },
       measurementResult: {
