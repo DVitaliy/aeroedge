@@ -34,6 +34,7 @@ class DetailsPage extends React.Component {
       <React.Fragment>
         <SideBar />
         {/*React.createElement((import Details5m from "../components/Details5M.comp"), {})*/}
+        <h1>Hello</h1>
       </React.Fragment>
     );
   }
