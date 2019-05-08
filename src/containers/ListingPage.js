@@ -1,14 +1,16 @@
 /**
   TODO: 
   - button which remove all filter - done
-  - change inside params (status 1 - Completed) enumValues datasource.const
+  - change inside params (status 1 - Completed) enumValues datasource.const - done
   - loading (skip getData if true, animation show) - done
   - SideBar (filter)
-  - pagination (next, prev)
-  - remove console.log
-  - show error toast bad connect or fail getData
+  - pagination (next, prev) - done
+  - remove console.log - done
+  - show error toast bad connect or fail getData - done
   - corrected position popOver at small size view (when listing table transformed)
   - in popover make userfull input -> for ProductId, RevicionCode.. - use select
+  - set by default `status` params, according of `Functional requirement` (use `listingPreprocessGetData`)
+    - dont show `status` filter (chip)
 */
 
 import React from "react";
@@ -82,11 +84,6 @@ const EmptyData = () => (
     No Data
   </h5>
 );
-/*const Loading = () => (
-  <div className="progress">
-    <div className="indeterminate" />
-  </div>
-);*/
 const Pagination = ({ prev, next }) => (
   <ul className="pagination right">
     <li className={prev ? "" : "disabled"}>
@@ -155,7 +152,6 @@ const TableBody = ({ data, click, pattern }) => (
 
 class ListingPage extends React.Component {
   constructor(props) {
-    console.log("ListingPage constructor", props);
     super(props);
     this.state = {
       data: [],
@@ -191,10 +187,16 @@ class ListingPage extends React.Component {
     this.popOverInstance = null;
   }
 
-  handleItemClick(item) {
-    this.props.history.push(
-      `/${this.props.match.params[0]}/detail/${item["Serial No"]}`
-    );
+  handleItemClick(item = {}) {
+    const {
+      detailsDataPattern = {},
+      listingPreprocessItemClick = obj => "string",
+    } = this.DATASOURCE_OBJ;
+    const { pathname = `/${this.DATASOURCE_KEY}/item/` } = detailsDataPattern;
+
+    item = listingPreprocessItemClick(item);
+
+    this.props.history.push(pathname + item);
   }
   handleHeadOver(el) {
     this.popOverInstance.show(el.target);
@@ -207,7 +209,6 @@ class ListingPage extends React.Component {
         .replace(new RegExp("&?filter\\." + key + "=[^&]+"), "")
         .replace(/(&?)page=[^&]+/, ""),
     });
-    this.setState({ nextPage: null, prevPage: null, allPages: {} });
   }
   handleHeadClick(evt) {
     evt.preventDefault();
@@ -231,7 +232,6 @@ class ListingPage extends React.Component {
 
     // Remove page params
     search = search.replace(/(&?)page=[^&]+/, "");
-    this.setState({ nextPage: null, prevPage: null, allPages: {} });
 
     this.props.history.push({
       pathname: this.props.location.pathname,
@@ -259,7 +259,6 @@ class ListingPage extends React.Component {
 
     // Remove page params
     search = search.replace(/(&?)page=[^&]+/, "");
-    this.setState({ nextPage: null, prevPage: null, allPages: {} });
 
     this.props.history.push({
       pathname: this.props.location.pathname,
@@ -294,6 +293,10 @@ class ListingPage extends React.Component {
 
     this.setState({ loading: true });
     const { search } = this.props.location;
+    const currentPage = (() => {
+      const match = search.match(/page=([^&]+)/);
+      return match && match[1];
+    })();
 
     const preprocessing =
       "listingPreprocessGetData" in this.DATASOURCE_OBJ
@@ -310,35 +313,19 @@ class ListingPage extends React.Component {
         )
       )
       .then(data => {
-        this.setState(
-          state => {
-            console.log(state, data);
-            let result = {
-              data: data.list,
-              loading: false,
-              nextPage: data.nextPage || null,
-              prevPage:
-                state.nextPage && state.nextPage in state.allPages
-                  ? state.allPages[state.nextPage] !== data.nextPage
-                    ? state.allPages[state.nextPage]
-                    : (() => {
-                        // prev click
-                        try {
-                          const match = search.match(/page=([^&]+)/);
-                          return match && state.allPages[match[1]];
-                        } catch (e) {}
-                        return "1112";
-                      })()
-                  : state.nextPage,
-              allPages: { ...state.allPages },
-            };
-            if (data.nextPage && !(data.nextPage in state.allPages)) {
-              result.allPages[data.nextPage] = state.nextPage || "";
-            }
-            return result;
-          },
-          () => console.log(this.state)
-        );
+        this.setState(state => {
+          let result = {
+            data: data.list,
+            loading: false,
+            nextPage: data.nextPage || null,
+            prevPage: currentPage ? state.allPages[currentPage] : null,
+            allPages: currentPage ? { ...state.allPages } : {},
+          };
+          if (data.nextPage && !(data.nextPage in state.allPages)) {
+            result.allPages[data.nextPage] = currentPage || "";
+          }
+          return result;
+        });
       })
       .catch(error => {
         this.setState({
@@ -351,7 +338,6 @@ class ListingPage extends React.Component {
     const { data } = this.state;
     const { search } = this.props.location;
     const { prev, next } = this.generatePaging();
-    console.log(this.generatePaging());
     const { listingDataPattern = {} } = this.DATASOURCE_OBJ;
     const sort = {
       field: null,
@@ -383,7 +369,6 @@ class ListingPage extends React.Component {
         <div className="row">
           <div className="col s12">
             <div className="card">
-              {/*loading && <Loading />*/}
               {Object.keys(filters).length !== 0 && (
                 <FilterChip
                   data={Object.keys(filters).map(key => ({

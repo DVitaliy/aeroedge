@@ -1,6 +1,15 @@
+/**
+  TODO: 
+  - remove console.log
+  - clear/check inputs if filter was remove/changed
+  - insert params in input from query during mounting
+
+  */
+
 import React from "react";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
+import { getDataSourceByKey } from "../constants";
 
 const ImportButton = ({ handleClick = () => {} }) => (
   <a
@@ -24,28 +33,53 @@ const AddNewButton = ({ handleClick = () => {} }) => (
   </a>
 );
 
-const ListingForm = ({ handleClick = () => {}, setRef }) => {
+const ListingForm = ({ handleClick = () => {}, setRef, inputPattern = {} }) => {
+  const {
+    textInput = {},
+    dataStartInput = {},
+    dataEndInput = {},
+  } = inputPattern;
   return (
     <ul ref={setRef}>
       <li style={{ width: "145px" }}>
         <div className="input-field">
           <i className="material-icons prefix">description</i>
-          <input id="serial" type="text" />
-          <label htmlFor="serial">Serial No...</label>
+          <input
+            id="description"
+            type="text"
+            name={textInput.name || "textInput"}
+          />
+          <label htmlFor="description">
+            {textInput.displayName || "textInput"}
+          </label>
         </div>
       </li>
-      <li style={{ width: "125px" }}>
+      <li style={{ width: "130px" }}>
         <div className="input-field">
           <i className="material-icons prefix">date_range</i>
-          <input id="startData" type="text" className="datepicker" />
-          <label htmlFor="startData">Start data...</label>
+          <input
+            id="startData"
+            type="text"
+            name={dataStartInput.name || "dataStartInput"}
+            className="datepicker"
+          />
+          <label htmlFor="startData">
+            {dataStartInput.displayName || "dataStartInput"}
+          </label>
         </div>
       </li>
-      <li style={{ width: "125px" }}>
+      <li style={{ width: "130px" }}>
         <div className="input-field">
           <i className="material-icons prefix">date_range</i>
-          <input id="endData" type="text" className="datepicker" />
-          <label htmlFor="endData">End data...</label>
+          <input
+            id="endData"
+            type="text"
+            name={dataEndInput.name || "dataEndInput"}
+            className="datepicker"
+          />
+          <label htmlFor="endData">
+            {dataEndInput.displayName || "dataEndInput"}
+          </label>
         </div>
       </li>
       <li>
@@ -64,14 +98,19 @@ class SideBar extends React.Component {
     listingFormEnable: true,
   };
   constructor(props) {
-    console.log("SideBar constructor", props);
     super(props);
+
+    this.DATASOURCE_KEY = this.props.match.params[0];
+    this.DATASOURCE_OBJ = getDataSourceByKey(this.DATASOURCE_KEY);
+
     this.datepicker = null;
     this.sideNavInstance = null;
 
     this.listingForm = React.createRef();
     this.listingFormBarWrapped = React.createRef();
     this.listingFormNavWrapped = React.createRef();
+
+    this.listingFormClick = this.listingFormClick.bind(this);
   }
 
   componentDidMount() {
@@ -102,12 +141,35 @@ class SideBar extends React.Component {
     console.log("SideBar componentDidMount");
   }
   componentDidUpdate(prevProps) {
-    console.log("SideBar componentDidUpdate");
+    // make clear input
+    //if (prevProps.location.search !== this.props.location.search){}
   }
   componentWillUnmount() {
     console.log("SideBar componentWillUnmount");
     this.datepicker.map(instance => instance.destroy());
     this.sideNavInstance.destroy();
+  }
+  listingFormClick() {
+    const { listingSideBarPattern = {} } = this.DATASOURCE_OBJ;
+    const {
+      pathname = `/${this.DATASOURCE_KEY}/listing`,
+      clickPreprocess = obj => obj,
+    } = listingSideBarPattern;
+    let params = {};
+
+    [...this.listingForm.current.querySelectorAll("input[name]")].map(
+      el => (params[el.name] = el.value)
+    );
+
+    params = clickPreprocess(params);
+
+    this.props.history.push({
+      pathname,
+      search: Object.keys(params)
+        .filter(key => !!params[key])
+        .map(key => `${key}=${params[key]}`)
+        .join("&"),
+    });
   }
   render() {
     const {
@@ -116,7 +178,7 @@ class SideBar extends React.Component {
       addNewEnable,
       listingFormEnable,
     } = this.props;
-    const dataSource = this.props.match.params[0];
+    const { listingSideBarPattern = {} } = this.DATASOURCE_OBJ;
     return (
       <>
         <div className="navbar-fixed">
@@ -136,7 +198,8 @@ class SideBar extends React.Component {
                 {listingFormEnable && (
                   <ListingForm
                     setRef={this.listingForm}
-                    handleClick={() => history.push(`/${dataSource}/listing`)}
+                    handleClick={this.listingFormClick}
+                    inputPattern={listingSideBarPattern}
                   />
                 )}
               </div>
@@ -146,14 +209,14 @@ class SideBar extends React.Component {
                     {addNewEnable && (
                       <AddNewButton
                         handleClick={() =>
-                          history.push(`/${dataSource}/detail/new`)
+                          history.push(`/${this.DATASOURCE_KEY}/detail/new`)
                         }
                       />
                     )}
                     {importEnable && (
                       <ImportButton
                         handleClick={() =>
-                          history.push(`/${dataSource}/import`)
+                          history.push(`/${this.DATASOURCE_KEY}/import`)
                         }
                       />
                     )}

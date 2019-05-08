@@ -1,10 +1,10 @@
 const DATASOURCE = {
   "5m": {
+    roleList: ["5M", "5MMASTER"],
     displayName: "5M model",
     displayIcon: "filter_5",
-    //defaultRoute: "/listing?sort.productCode=1",
-    defaultRoute:
-      "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
+    defaultRoute: "/item/56789010/T1",
+    //defaultRoute: "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
     listingDataPattern: {
       arrivalDate: { displayName: "Arrival date" },
       measurementResult: {
@@ -37,12 +37,33 @@ const DATASOURCE = {
       },
       workedDate: { displayName: "Worked date" },
     },
-    listingPreprocessGetData: ({ datasource, parameters }) => {
-      //if (!~parameters.indexOf(`filter.status=`))
-
-      return { datasource, parameters };
+    listingSideBarPattern: {
+      textInput: {
+        name: "serialNo",
+        displayName: "Serial No...",
+      },
+      dataStartInput: {
+        name: "startData",
+        displayName: "Start data...",
+      },
+      dataEndInput: {
+        name: "endData",
+        displayName: "End data...",
+      },
+      clickPreprocess: ({ serialNo, startData, endData }) => ({
+        "filter.serialNo": serialNo,
+        "filter.date": !startData && !endData ? "" : startData + "|" + endData,
+      }),
     },
-    roleList: ["5M", "5MMASTER"],
+    /*listingPreprocessGetData: ({ datasource, parameters }) => {
+      //if (!~parameters.indexOf(`filter.status=`))
+      return { datasource, parameters };
+    },*/
+    listingPreprocessItemClick: ({ serialNo, methodCode }) =>
+      `${serialNo}/${methodCode}`,
+    detailsDataPattern: {
+      component: "DetailsFiveM",
+    },
   },
   logi: {
     displayName: "Logistics",
@@ -77,4 +98,6 @@ export const getListDataSourceByRole = (access = []) =>
       }))
   );
 
-export const getDataSourceByKey = key => DATASOURCE[key] || null;
+export const getDataSourceByKey = key => {
+  return { ...DATASOURCE[key] } || null;
+};
