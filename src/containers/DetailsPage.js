@@ -30,10 +30,11 @@ class DetailsPage extends React.Component {
   }
   render() {
     const DetailsComponent = `Details${this.DATASOURCE_KEY}`;
+    //const Component = import("../../components/Details5M.comp.js");
     return (
       <React.Fragment>
         <SideBar />
-        {/*React.createElement((import Details5m from "../components/Details5M.comp"), {})*/}
+        {console.log(await import("../../components/Details5M.comp.js"))}
         <h1>Hello</h1>
       </React.Fragment>
     );
