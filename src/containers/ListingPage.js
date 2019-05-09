@@ -190,13 +190,19 @@ class ListingPage extends React.Component {
   handleItemClick(item = {}) {
     const {
       detailsDataPattern = {},
-      listingPreprocessItemClick = obj => "string",
+      listingPreprocessItemClick = obj => obj,
     } = this.DATASOURCE_OBJ;
-    const { pathname = `/${this.DATASOURCE_KEY}/item/` } = detailsDataPattern;
+    const { pathname = `/${this.DATASOURCE_KEY}/item` } = detailsDataPattern;
 
     item = listingPreprocessItemClick(item);
 
-    this.props.history.push(pathname + item);
+    this.props.history.push({
+      pathname,
+      search: Object.keys(item)
+        .filter(key => !!item[key])
+        .map(key => `${key}=${item[key]}`)
+        .join("&"),
+    });
   }
   handleHeadOver(el) {
     this.popOverInstance.show(el.target);

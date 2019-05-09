@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { SideBar } from "./";
-import { Details5m } from "../components";
+import { DetailsComponent } from "../components";
 import { getDataSourceByKey } from "../constants";
 
 class DetailsPage extends React.Component {
@@ -29,13 +29,18 @@ class DetailsPage extends React.Component {
     this.select.map(instance => instance.destroy());
   }
   render() {
-    const DetailsComponent = `Details${this.DATASOURCE_KEY}`;
-    //const Component = import("../../components/Details5M.comp.js");
+    //const { detailsDataPattern = {} } = this.DATASOURCE_OBJ;
+    //const { Component = `Details${this.DATASOURCE_KEY}` } = detailsDataPattern;
+
+    //const DetailsComponent = `Details${this.DATASOURCE_KEY}`;
+    console.log(DetailsComponent);
+    const Component = DetailsComponent[this.DATASOURCE_KEY];
     return (
       <React.Fragment>
         <SideBar />
-        {console.log(await import("../../components/Details5M.comp.js"))}
+
         <h1>Hello</h1>
+        <Component />
       </React.Fragment>
     );
   }

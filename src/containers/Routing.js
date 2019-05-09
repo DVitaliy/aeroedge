@@ -53,12 +53,9 @@ class Routing extends React.Component {
         <SideNav datasource={DATASOURCE} />
         <Switch>
           <Route exact path={ROOT_PATH} component={DashboardPage} />
-          <Route path={`${ROOT_PATH}/listing`} component={ListingPage} />
-          <Route path={`${ROOT_PATH}/import`} component={ImportPage} />
-          <Route
-            path={`${ROOT_PATH}/item/:serialNo/:methodCode`}
-            component={DetailsPage}
-          />
+          <Route exact path={`${ROOT_PATH}/listing`} component={ListingPage} />
+          <Route exact path={`${ROOT_PATH}/import`} component={ImportPage} />
+          <Route exact path={`${ROOT_PATH}/item`} component={DetailsPage} />
           <Route
             exact
             path={`${ROOT_PATH}/detail/new`}

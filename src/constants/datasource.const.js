@@ -3,7 +3,7 @@ const DATASOURCE = {
     roleList: ["5M", "5MMASTER"],
     displayName: "5M model",
     displayIcon: "filter_5",
-    defaultRoute: "/item/56789010/T1",
+    defaultRoute: "/item?serialNo=12345010&methodCode=T1",
     //defaultRoute: "/listing?filter.revisionCode=E4&sort.productCode=1&filter.methodCode=T1&filter.serialNo=10",
     listingDataPattern: {
       arrivalDate: { displayName: "Arrival date" },
@@ -59,10 +59,13 @@ const DATASOURCE = {
       //if (!~parameters.indexOf(`filter.status=`))
       return { datasource, parameters };
     },*/
-    listingPreprocessItemClick: ({ serialNo, methodCode }) =>
-      `${serialNo}/${methodCode}`,
+    listingPreprocessItemClick: ({ serialNo, methodCode }) => ({
+      serialNo,
+      methodCode,
+    }),
     detailsDataPattern: {
-      component: "DetailsFiveM",
+      //pathname:"",
+      Component: "DetailsFive",
     },
   },
   logi: {
