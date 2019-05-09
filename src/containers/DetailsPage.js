@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import { dsAction } from "../actions";
 import { SideBar } from "./";
 import { DetailsComponent } from "../components";
 import { getDataSourceByKey } from "../constants";
@@ -9,6 +10,10 @@ class DetailsPage extends React.Component {
   constructor(props) {
     console.log("DetailsPage constructor", props);
     super(props);
+    this.state = {
+      data: {},
+      loading: false,
+    };
     this.select = null;
 
     this.DATASOURCE_KEY = this.props.match.params[0];
@@ -16,10 +21,10 @@ class DetailsPage extends React.Component {
   }
 
   componentDidMount() {
-    console.log("DetailsPage componentDidMount");
     window.M.updateTextFields();
     const elems = document.querySelectorAll("select");
     this.select = window.M.FormSelect.init(elems, {});
+    this.getData();
   }
   componentDidUpdate(prevProps) {
     console.log("DetailsPage componentDidUpdate");
@@ -28,19 +33,47 @@ class DetailsPage extends React.Component {
     console.log("DetailsPage componentWillUnmount");
     this.select.map(instance => instance.destroy());
   }
-  render() {
-    //const { detailsDataPattern = {} } = this.DATASOURCE_OBJ;
-    //const { Component = `Details${this.DATASOURCE_KEY}` } = detailsDataPattern;
 
-    //const DetailsComponent = `Details${this.DATASOURCE_KEY}`;
-    console.log(DetailsComponent);
+  getData() {
+    if (this.state.loading) return;
+    this.setState({ loading: true });
+
+    const { search } = this.props.location;
+    const { detailsDataPattern = {} } = this.DATASOURCE_OBJ;
+    const { preprocessGetData = arg => arg } = detailsDataPattern;
+
+    this.props
+      .dispatch(
+        dsAction.details(
+          preprocessGetData({
+            datasource: this.DATASOURCE_KEY,
+            parameters: search,
+          })
+        )
+      )
+      .then(data => {
+        console.log(data);
+        this.setState({
+          data,
+          loading: false,
+        });
+      })
+      .catch(error => {
+        this.setState({
+          loading: false,
+        });
+        window.M.toast({ html: error, classes: "warning" });
+      });
+  }
+
+  render() {
+    const { data } = this.state;
     const Component = DetailsComponent[this.DATASOURCE_KEY];
+
     return (
       <React.Fragment>
         <SideBar />
-
-        <h1>Hello</h1>
-        <Component />
+        {Object.keys(data).length !== 0 && <Component daya={data} />}
       </React.Fragment>
     );
   }

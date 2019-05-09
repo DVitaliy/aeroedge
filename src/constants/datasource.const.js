@@ -66,6 +66,17 @@ const DATASOURCE = {
     detailsDataPattern: {
       //pathname:"",
       Component: "DetailsFive",
+      preprocessGetData: ({ datasource, parameters }) => {
+        const { serialNo = "none", methodCode = "none" } = JSON.parse(
+          '{"' +
+            decodeURI(parameters.substring(1))
+              .replace(/"/g, '\\"')
+              .replace(/&/g, '","')
+              .replace(/=/g, '":"') +
+            '"}'
+        );
+        return { datasource, parameters: `/item/${serialNo}/${methodCode}` };
+      },
     },
   },
   logi: {

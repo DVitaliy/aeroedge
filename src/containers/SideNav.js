@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
 import { authAction } from "../actions";
+import logo from "./../../public/logo.jpg";
 
 class SideNav extends React.Component {
   constructor(props) {
@@ -39,11 +40,7 @@ class SideNav extends React.Component {
           <li style={{ height: "180px" }}>
             <div className="user-view" style={{ paddingTop: "90px" }}>
               <div className="background" style={{ height: "180px" }}>
-                <img
-                  alt=""
-                  width="140%"
-                  src={(process.env.PUBLIC_URL || "") + "/logo.jpg"}
-                />
+                <img alt="" width="140%" src={logo} />
               </div>
               <img
                 className="circle hide"

@@ -304,15 +304,12 @@ class ListingPage extends React.Component {
       return match && match[1];
     })();
 
-    const preprocessing =
-      "listingPreprocessGetData" in this.DATASOURCE_OBJ
-        ? this.DATASOURCE_OBJ.listingPreprocessGetData
-        : arg => arg;
+    const { listingPreprocessGetData = obj => obj } = this.DATASOURCE_OBJ;
 
     this.props
       .dispatch(
         dsAction.listing(
-          preprocessing({
+          listingPreprocessGetData({
             datasource: this.DATASOURCE_KEY,
             parameters: search,
           })
