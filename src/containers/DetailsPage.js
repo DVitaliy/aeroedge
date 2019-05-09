@@ -8,30 +8,18 @@ import { getDataSourceByKey } from "../constants";
 
 class DetailsPage extends React.Component {
   constructor(props) {
-    console.log("DetailsPage constructor", props);
     super(props);
     this.state = {
       data: {},
       loading: false,
     };
-    this.select = null;
 
     this.DATASOURCE_KEY = this.props.match.params[0];
     this.DATASOURCE_OBJ = getDataSourceByKey(this.DATASOURCE_KEY);
   }
 
   componentDidMount() {
-    window.M.updateTextFields();
-    const elems = document.querySelectorAll("select");
-    this.select = window.M.FormSelect.init(elems, {});
     this.getData();
-  }
-  componentDidUpdate(prevProps) {
-    console.log("DetailsPage componentDidUpdate");
-  }
-  componentWillUnmount() {
-    console.log("DetailsPage componentWillUnmount");
-    this.select.map(instance => instance.destroy());
   }
 
   getData() {
@@ -73,7 +61,9 @@ class DetailsPage extends React.Component {
     return (
       <React.Fragment>
         <SideBar />
-        {Object.keys(data).length !== 0 && <Component daya={data} />}
+        {!!Object.keys(data).length && (
+          <Component data={data} dataSource={this.DATASOURCE_OBJ} />
+        )}
       </React.Fragment>
     );
   }

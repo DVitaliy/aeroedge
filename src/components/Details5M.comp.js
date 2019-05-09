@@ -4,9 +4,25 @@ import PropTypes from "prop-types";
 class DetailsFive extends React.Component {
   constructor(props) {
     super(props);
+    this.state = props.data;
+    this.selectInstance = null;
   }
   componentDidMount() {
-    //window.M.updateTextFields();
+    window.M.updateTextFields();
+    const elems = document.querySelectorAll("select");
+    this.selectInstance = window.M.FormSelect.init(elems, {});
+  }
+  componentWillUnmount() {
+    this.selectInstance.map(instance => instance.destroy());
+  }
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value,
+    });
   }
 
   render() {
@@ -42,8 +58,14 @@ class DetailsFive extends React.Component {
                 </blockquote>
               </div>
               <div className="input-field col s12 m6">
-                <input defaultValue="12345001" id="input2-1" type="text" />
-                <label htmlFor="input2-1">Serial No:</label>
+                <input
+                  value={this.state.serialNo}
+                  name="serialNo"
+                  id="serialNo"
+                  type="text"
+                  onChange={this.handleInputChange}
+                />
+                <label htmlFor="serialNo">Serial No:</label>
               </div>
               <div className="input-field col s12 m6">
                 <select>
@@ -228,5 +250,8 @@ class DetailsFive extends React.Component {
     );
   }
 }
-
+DetailsFive.propTypes = {
+  data: PropTypes.object.isRequired,
+  dataSource: PropTypes.object.isRequired,
+};
 export default DetailsFive;

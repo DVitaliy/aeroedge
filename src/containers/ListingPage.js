@@ -372,7 +372,7 @@ class ListingPage extends React.Component {
         <div className="row">
           <div className="col s12">
             <div className="card">
-              {Object.keys(filters).length !== 0 && (
+              {!!Object.keys(filters).length && (
                 <FilterChip
                   data={Object.keys(filters).map(key => ({
                     key,
