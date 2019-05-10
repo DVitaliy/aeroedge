@@ -2,7 +2,7 @@
   TODO: process.env.NODE_ENV
   - include redux devtools only dev mode
   - subscribe to store only dev mode
-  - add caching for `get` request in API
+  - add caching for `get` request to API
 */
 
 import React from "react";
